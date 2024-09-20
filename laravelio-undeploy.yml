@@ -1,0 +1,21 @@
+---
+# Undeploy playbook for laravel.io and its components
+
+- name: Undeploy Laravel
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - undeploy_laravel
+
+- name: Undeploy MySQL
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - undeploy_mysql
+
+- name: Destroy Namespace
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - namespace_destroy
+

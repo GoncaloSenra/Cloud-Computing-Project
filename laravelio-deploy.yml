@@ -1,0 +1,57 @@
+---
+# Playbook to deploy laravel.io and its components
+
+- name: Create Namespace
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - namespace_create
+
+- name: Deploy MySQL
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - deploy_mysql
+
+
+- name: sleep 90 seconds
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - role: progress_bar
+      vars:
+        sleep_duration: 9
+
+
+- name: Deploy Laravel
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - deploy_laravel
+
+- name: Reload inventory
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Refresh inventory
+      meta: refresh_inventory
+
+- name: Load dashboards
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - dashboard_laravelio
+
+- name: sleep 150 seconds
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - role: progress_bar
+      vars:
+        sleep_duration: 20
+
+- name: Autoscale Laravel
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - autoscale_laravel

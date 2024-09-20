@@ -1,0 +1,79 @@
+# roles/progress_bar/tasks/main.yml
+- name: Display progress bar 10%
+  debug:
+    msg: "█ | 10%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 20%
+  debug:
+    msg: "██ | 20%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 30%
+  debug:
+    msg: "███ | 30%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 40%
+  debug:
+    msg: "████ | 40%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 50%
+  debug:
+    msg: "█████ | 50%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 60%
+  debug:
+    msg: "██████ | 60%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 70%
+  debug:
+    msg: "███████ | 70%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 80%
+  debug:
+    msg: "████████ | 80%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 90%
+  debug:
+    msg: "█████████ | 90%"
+    verbosity: 0
+  run_once: true
+- name: Pause "{{ sleep_duration }}" seconds
+  command: sleep "{{ sleep_duration }}"
+
+- name: Display progress bar 100%
+  debug:
+    msg: "██████████ | 100%"
+    verbosity: 0
+  run_once: true
+

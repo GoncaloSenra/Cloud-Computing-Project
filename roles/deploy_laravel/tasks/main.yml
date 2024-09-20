@@ -1,0 +1,110 @@
+
+- name: Create static ip adress
+  gcp_compute_address:
+    name: "{{ gcp_project }}-ip"
+    region: "{{ gcp_region }}"
+    project: "{{ gcp_project }}"
+    state: present
+    auth_kind: "{{ gcp_auth_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present
+  register: app_ip
+
+- name: Set app_ip and app_port
+  ansible.builtin.set_fact:
+    app_ip: "{{ app_ip.address }}"
+    app_port: 80
+
+- name: Update app_ip in inventory file
+  command: " sed -i 's/  app_ip:.*/  app_ip:  {{ app_ip }}/g' inventory/gcp.yml"
+
+
+
+- name: Create Laravel Service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: laravel-service 
+        namespace: "{{ namespace }}" 
+        labels:
+          app: laravel
+      spec:
+        type: LoadBalancer
+        selector:
+          app: laravel
+        ports:
+          - port: 80 
+            targetPort: 8000 
+        loadBalancerIP: "{{ app_ip }}"
+
+- name: Create persistent volume storage
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: laravel-pv-claim
+        namespace: "{{ namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+
+# Deployment for deploying Laravel
+- name: Deploy Laravel
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: laravel
+        namespace: "{{ namespace }}"
+        labels:
+          app: laravel
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: laravel
+        template:
+          metadata:
+            labels:
+              app: laravel
+          spec:
+            containers:
+            - name: laravel
+              image: "{{docker_image}}"
+              env:
+              - name: DB_CONNECTION
+                value: "{{ db_connection }}"
+              - name: DB_HOST
+                value: mysql-service
+              - name: DB_DATABASE
+                value: laravel
+              - name: DB_USERNAME
+                value: myuser
+              - name: DB_PASSWORD
+                value: password
+              - name: seed_database
+                value: "{{ seed_database }}"
+              ports:
+              - containerPort: 8000
+              resources:
+                limits:
+                  cpu: 550m
+                requests:
+                  cpu: 200m
+              volumeMounts:
+                  - name: laravel-persistent-storage
+                    mountPath: /laravel.io/storage/framework/sessions
+            volumes:
+              - name: laravel-persistent-storage
+                persistentVolumeClaim:
+                  claimName: laravel-pv-claim

@@ -1,0 +1,48 @@
+- name: Delete HPA Deployment
+  ansible.builtin.k8s:
+    state: absent
+    definition:
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: laravel-autoscaler
+        namespace: "{{ namespace }}"
+        
+- name: Delete Laravel Deployment
+  k8s:
+    state: absent
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: laravel
+        namespace: "{{ namespace }}"
+
+- name: Delete Laravel PVC
+  k8s:
+    state: absent
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: laravel-pv-claim
+        namespace: "{{ namespace }}"
+
+- name: Delete Laravel Service
+  k8s:
+    state: absent
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: laravel-service
+        namespace: "{{ namespace }}"
+
+- name: Destroy Static IP
+  gcp_compute_address:
+    name: "{{ gcp_project }}-ip"
+    region: "{{ gcp_region }}"
+    project: "{{ gcp_project }}"
+    state: absent
+    auth_kind: "{{ gcp_auth_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"

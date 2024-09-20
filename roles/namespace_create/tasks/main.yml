@@ -1,0 +1,12 @@
+
+- name: Create Namespace
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        labels:
+          app: laravel
+        name: laravel
+    validate_certs: false

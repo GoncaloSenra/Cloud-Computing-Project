@@ -1,0 +1,83 @@
+- name: Create MySQL Service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: mysql-service # Nome lógico do serviço, que também será o nome DNS do serviço quando for criado.
+        namespace: "{{ namespace }}" # Namespace em que o serviço será criado
+        labels:
+          app: mysql-laravel
+      spec:
+        type: ClusterIP
+        selector:
+          app: mysql-laravel
+          tier: mysql
+        ports:
+          - port: "{{ db_port }}" # Número de porta exposto internamente no cluster
+            targetPort: "{{ db_port }}" # Porta em que os containers estão ouvindo
+
+
+- name: Create persistent volume storage
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: mysql-pv-claim
+        namespace: "{{ namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+
+- name: Deploy mysql
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mysql-service
+        namespace: "{{ namespace }}"
+        labels:
+          app: mysql-laravel
+      spec:
+        selector:
+          matchLabels:
+            app: mysql-laravel
+            tier: mysql
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              app: mysql-laravel
+              tier: mysql
+          spec:
+            containers:
+              - image: mysql:latest
+                name: mysql
+                env:
+                  - name: MYSQL_ALLOW_EMPTY_PASSWORD
+                    value: "true"
+                  - name: MYSQL_DATABASE
+                    value: "{{ db_database }}"
+                  - name: MYSQL_USER
+                    value: "{{ db_user }}"
+                  - name: MYSQL_PASSWORD
+                    value: "{{ db_password }}"
+                ports:
+                  - containerPort: "{{ db_port }}"
+                    name: mysql
+                volumeMounts:
+                  - name: mysql-persistent-storage
+                    mountPath: /var/lib/mysql
+            volumes:
+              - name: mysql-persistent-storage
+                persistentVolumeClaim:
+                  claimName: mysql-pv-claim

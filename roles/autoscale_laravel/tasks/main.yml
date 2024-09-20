@@ -1,0 +1,28 @@
+---
+- name: Configurar autoscaler
+  ansible.builtin.k8s:
+    kubeconfig: "~/.kube/config"
+    state: present
+    definition:
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: laravel-autoscaler
+        namespace: "{{ namespace }}"
+      spec:
+        scaleTargetRef:
+          apiVersion: apps/v1
+          kind: Deployment
+          name: laravel
+        minReplicas: 1
+        maxReplicas: 3
+        metrics:
+          - type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageValue: "250m" # aprox 50% de 550m
+        selector:
+          matchLabels:
+            app: laravel

@@ -1,0 +1,22 @@
+- name: Test Laravel with Locust
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Install Locust and dependencies
+      pip:
+        name: 
+          - locust
+          - charset_normalizer
+          - bs4
+        state: present
+
+    - name: Run Locust
+      command: >
+        locust --headless --locustfile tests/locustfile.py --host=http://{{ app_ip }}:{{ app_port }} --users {{ n_users }} --spawn-rate {{ spawn_rate }} --run-time {{ run_time }} --json --skip-log --html "status/locust-{{ n_users }}.html"
+      environment:
+        app_ip: "{{ app_ip }}"
+      ignore_errors: yes
+
+    - name: Remove __pycache__ folder
+      command: rm -rf tests/__pycache__
+

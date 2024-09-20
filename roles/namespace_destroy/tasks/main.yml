@@ -1,0 +1,10 @@
+
+- name: Delete Namespace
+  k8s:
+    state: absent
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: laravel
+    validate_certs: false
